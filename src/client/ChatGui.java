@@ -3,6 +3,7 @@ package client;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.EventQueue;
+import java.awt.Font;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -11,25 +12,33 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
+
+
+
 import javax.swing.JScrollPane;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JTextPane;
 import javax.swing.JTextField;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.Socket;
 import java.awt.event.ActionEvent;
 import javax.swing.JLabel;
 
-public class ChatGui extends JFrame  {
-	private Socket socket;// this only for send
-	private String Data;
+public class ChatGui  {
+	private Client client;// this only for send
 	private String DesUser;
-	
+	private JFrame frame;
 	private static String[] emojiDir = {"/image/like.png","/image/smile_big.png","/image/crying.png","/image/heart_eye.png"};
 	private JPanel contentPane;
 	private JTextField chatMess;
 	private JTextPane MessPane;
-	
+	private JLabel filePath;
+	private String filename;
+	private int fileSelected=0;
 	/**
 	 * Launch the application.
 	 */
@@ -37,8 +46,8 @@ public class ChatGui extends JFrame  {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					ChatGui frame = new ChatGui("Ha Minh Toan","");
-					frame.setVisible(true);
+					ChatGui frame = new ChatGui("Ha Minh Toan",null);
+					frame.getFrame().setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -46,13 +55,12 @@ public class ChatGui extends JFrame  {
 		});
 	}
 	
-	ChatGui(String DesUser,String Data){
+	ChatGui(String DesUser,Client client){
 		this.DesUser = DesUser;
-		this.Data = Data;
-		
+		this.client = client;
 		intialize();
 		//(new ListenDataChange()).start();
-		this.setVisible(true);
+		this.getFrame().setVisible(true);
 	}
 	public void SetData(String Data1)
 	{
@@ -62,33 +70,64 @@ public class ChatGui extends JFrame  {
 	/**
 	 * Create the frame.
 	 */
-	//RECEIVE
-	public class ListenDataChange extends Thread {
-		@Override
-		public void run()
-		{
-			super.run();
-			while(true)
-			{
-				System.out.println("aduma sai gon");
-				if(!Data.equals(""))
-				{
-					updateReceiveMess(Data);
-					Data="";
-				}
-			}
-		}
-	}
-	
-	public void updateReceiveMess(String text)
-	{
 
-		JLabel temp = new JLabel(DesUser + " : " +text);
-		temp.setForeground(Color.red);
-		MessPane.insertComponent(temp);
+	public void updateReceiveFile(String filename)
+	{
+		updateReceiveMess("");
+		JButton File = new JButton(filename);
+		// Download 
+		File.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0)
+			{
+				try {
+					client.ReceiveFile(filename);
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				filePath.setText("You Received File: " + filename);
+			}
+		});
 		StyledDocument doc = (StyledDocument) MessPane.getDocument();
 		try {
-			doc.insertString(doc.getLength(), "\n", null);
+			
+			Style style = doc.addStyle("StyleName", null);
+			StyleConstants.setComponent(style,File);
+			doc.insertString(doc.getLength(), "\n", style);
+		} catch (BadLocationException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	}
+	public void updateReceiveMess(String text)
+	{
+		JLabel temp = new JLabel(DesUser + " : " +text);
+		temp.setForeground(Color.red);
+		
+
+		StyledDocument doc = (StyledDocument) MessPane.getDocument();
+		Style style = doc.addStyle("StyleName", null);
+		StyleConstants.setComponent(style, temp);
+		try {
+			doc.insertString(doc.getLength(), "\n", style);
+		} catch (BadLocationException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+	}
+	public void updateReceiveIcon(int emoji)
+	{
+		updateReceiveMess("");
+		StyledDocument doc = (StyledDocument) MessPane.getDocument();
+		try {
+			
+			Style style = doc.addStyle("StyleName", null);
+			StyleConstants.setComponent(style, new JLabel(new javax.swing.ImageIcon(ChatGui.class.getResource(emojiDir[emoji]))));
+			doc.insertString(doc.getLength(), "\n", style);
 		} catch (BadLocationException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -98,15 +137,19 @@ public class ChatGui extends JFrame  {
 	// TO DO : SEND FILE -> create send socket -> server
 	
 	//
+
 	public void updateSentText(String text)
 	{
 
 		JLabel temp = new JLabel("You : " +text);
 		temp.setForeground(Color.red);
-		MessPane.insertComponent(temp);
+		
+
 		StyledDocument doc = (StyledDocument) MessPane.getDocument();
+		Style style = doc.addStyle("StyleName", null);
+		StyleConstants.setComponent(style, temp);
 		try {
-			doc.insertString(doc.getLength(), "\n", null);
+			doc.insertString(doc.getLength(), "\n", style);
 		} catch (BadLocationException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -114,9 +157,7 @@ public class ChatGui extends JFrame  {
 	}
 	public void updateSentIcon(int emoji)
 	{
-		JLabel temp = new JLabel("you: ");
-		temp.setForeground(Color.red);
-		MessPane.insertComponent(temp);
+		updateSentText("");
 		StyledDocument doc = (StyledDocument) MessPane.getDocument();
 		try {
 			
@@ -130,11 +171,18 @@ public class ChatGui extends JFrame  {
 		}
 	}
 	public void intialize() {
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 713, 425);
+		//setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame = new JFrame();
+		frame.addWindowListener(new java.awt.event.WindowAdapter() {
+		    @Override
+		    public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+		        frame.setVisible(false);
+		    }
+		});
+		frame.setBounds(100, 100, 713, 425);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		setContentPane(contentPane);
+		frame.setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
 		
@@ -156,6 +204,12 @@ public class ChatGui extends JFrame  {
 		btnLike.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				updateSentIcon(0);
+				try {
+					client.SendIcon(DesUser, 0);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 		});
 		btnLike.setBounds(514, 29, 97, 35);
@@ -168,6 +222,12 @@ public class ChatGui extends JFrame  {
 		btnHaha.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				updateSentIcon(1);
+				try {
+					client.SendIcon(DesUser, 1);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 		});
 		btnHaha.setBounds(514, 67, 97, 35);
@@ -180,6 +240,12 @@ public class ChatGui extends JFrame  {
 		btnCry.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				updateSentIcon(2);
+				try {
+					client.SendIcon(DesUser, 2);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 		});
 		btnCry.setBounds(514, 105, 97, 35);
@@ -192,6 +258,12 @@ public class ChatGui extends JFrame  {
 		btnHeart.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				updateSentIcon(3);
+				try {
+					client.SendIcon(DesUser, 3);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 		});
 		btnHeart.setBounds(514, 145, 97, 35);
@@ -205,9 +277,31 @@ public class ChatGui extends JFrame  {
 			public void actionPerformed(ActionEvent arg0) {
 				if(!chatMess.getText().equals("")) {
 					updateSentText(chatMess.getText());
+					try {
+						client.SendMess(DesUser, chatMess.getText());
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					chatMess.setText("");
+
 				}
+				if(fileSelected==1)
+				{
+					fileSelected =0;
+					// client send file
+					try {
+						client.SendFileRequest(DesUser, filePath.getText(), "");
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				
+					// update text
+					updateSentText(filename);
+					filePath.setText("");
+					// send 
+				}
 			}
 		});
 		btnSend.setBounds(381, 276, 79, 45);
@@ -224,18 +318,40 @@ public class ChatGui extends JFrame  {
 		btnGetFile.setContentAreaFilled(false);
 		btnGetFile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				JFileChooser fileChooser = new JFileChooser();
+				fileChooser.setCurrentDirectory(new File(System
+						.getProperty("user.home")));
+				fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+			
+				int result = fileChooser.showOpenDialog(frame);
+				if (result == JFileChooser.APPROVE_OPTION) {
+					fileSelected = 1;
+					String path_send = (fileChooser.getSelectedFile()
+							.getAbsolutePath()) ;
+					filename = fileChooser.getSelectedFile().getName();
+					System.out.println(path_send);
+					filePath.setText(path_send);
+				}
 			}
 		});
 		btnGetFile.setBounds(381, 333, 79, 45);
 		contentPane.add(btnGetFile);
 		
-		JLabel lblNewLabel = new JLabel("New label");// file
+		filePath= new JLabel("New label");// file
 		
-		lblNewLabel.setBounds(43, 349, 241, 16);
-		contentPane.add(lblNewLabel);
+		filePath.setBounds(43, 349, 241, 16);
+		contentPane.add(filePath);
 		
 		JLabel lblDesUser = new JLabel(DesUser);//name des user
 		lblDesUser.setBounds(12, 13, 200, 25);
 		contentPane.add(lblDesUser);
+	}
+
+	public JFrame getFrame() {
+		return frame;
+	}
+
+	public void setFrame(JFrame frame) {
+		this.frame = frame;
 	}
 }

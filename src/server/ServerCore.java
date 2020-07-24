@@ -1,8 +1,11 @@
 package server;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -10,6 +13,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -17,8 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
+import File.FileInfo;
 import client.Client;
-import data.Peer;
 import tags.Decode;
 import tags.Encode;
 import tags.Tags;
@@ -36,8 +40,12 @@ public class ServerCore {
 	
 	public static void main(String[] args) throws Exception, IOException {
 		ServerCore test = new ServerCore(8080);
-
+		
 	}
+
+	
+	
+	
 	public void ClientPrint()
 	{
 		
@@ -113,6 +121,9 @@ public class ServerCore {
 	
 	public class Receive extends Thread {
 		private Socket cnc;
+		// File serversocket -> new port 
+		private ServerSocket File;
+		private Socket line;
 		public Receive(Socket cnc){this.cnc = cnc;}
 		@Override
 		public void run() {
@@ -140,12 +151,89 @@ public class ServerCore {
 			clients.remove(name);
 			BroadCast(Encode.UpdateUser(clients.keySet()));
 		}
+		//SEND FILE
+		public void SendFile(String filename)
+		{
+			ServerSocket sendSv=null;
+			Socket SendLine =null;
+		
+			try {
+				sendSv=new ServerSocket(0);
+				OutputStream os;
+				os = cnc.getOutputStream();
+				OutputStreamWriter osw = new OutputStreamWriter(os);
+				BufferedWriter bw = new BufferedWriter(osw);
+				bw.write(Integer.toString(sendSv.getLocalPort()));
+				bw.newLine();
+				bw.flush();
+				bw.write(Integer.toString(sendSv.getLocalPort()));
+				bw.newLine();
+				bw.flush();
+				System.out.println(Integer.toString(sendSv.getLocalPort()));
+				SendLine = sendSv.accept();
+		
+				ObjectOutputStream oos =new ObjectOutputStream(SendLine.getOutputStream());
+				FileInfo fileInfo = FileInfo.getFileInfo(filename,"");
+				oos.writeObject(fileInfo);
+				FileInfo.closeStream(oos);
+			
+		
+				SendLine.close();	
+				sendSv.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		
+		}
+		
+		//RECEIVE FILE
+		public void ReceiveFile(String msg)
+		{
+			// send file name  to desUser
+			String rt[] = Decode.getSendFileData(msg);
+			try {
+				sendToOneClient(rt[1],msg);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			// get des
+			// get get file name
+			// open receive thread
+			ServerSocket recv=null;
+			Socket recvSock =null;
+			try {
+				recv=new ServerSocket(0);
+				//Send sv Port to sendUser
+				OutputStream os;
+				os = cnc.getOutputStream();
+				OutputStreamWriter osw = new OutputStreamWriter(os);
+				BufferedWriter bw = new BufferedWriter(osw);
+				bw.write(Integer.toString(recv.getLocalPort()));
+				bw.newLine();
+				bw.flush();
+				bw.write(Integer.toString(recv.getLocalPort()));
+				bw.newLine();
+				bw.flush();
+				System.out.println(Integer.toString(recv.getLocalPort()));
+				
+				recvSock = recv.accept();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			FileThread receive = new FileThread(recvSock);
+			receive.start();
+			
+			 
+		}
 		public boolean SendMess(String msg)
 		{
 			String Data[] = Decode.Option2(msg);
-			System.out.println(Data[0]+ " : " + Data[1]+ " : " + Data[2]);
+			System.out.println(Data[0]+ " : " + Data[1]);
 			try { 
-				sendToOneClient(Data[0],Data[2]);
+				sendToOneClient(Data[0],msg);
 				return true;
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -278,6 +366,20 @@ public class ServerCore {
 						System.out.println("Client QUit");
 						this.stop();
 					}
+					else if(op ==5)
+					{
+						//SV receive file
+						ReceiveFile(msg);
+					}
+					else if(op == 6)
+					{
+						SendMess(msg);
+					}
+					else if(op ==7)
+					{
+						//SV send file
+						SendFile(Decode.getFileName(msg));
+					}
 					
 			
 				}
@@ -323,6 +425,6 @@ public class ServerCore {
 			}
 			}
 	}
-
-
+	
+	
 }

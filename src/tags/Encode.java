@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 
 public class Encode {
 
-	private static Pattern checkMessage = Pattern.compile("[^<>]*[<>]");
+
 	public static void main(String args[])
 	{
 
@@ -32,32 +32,42 @@ public class Encode {
 		}
 		rt = Tags.ONLINE_USER_OPEN_TAG +rt +Tags.ONLINE_USER_CLOSE_TAG;
 		return rt;
-		
+	
 	}
 	// for client
+	public static String FileReceive(String filename)
+	{
+		return Tags.OPTION_OPEN_TAG + "7" +Tags.OPTION_CLOSE_TAG +Tags.CHAT_MSG_OPEN_TAG +filename +Tags.CHAT_MSG_CLOSE_TAG;
+	}
+	public static String SendIcon(String name,String nameDes, String icon) // icon -> number
+	{
+		return Tags.OPTION_OPEN_TAG + "6" +Tags.OPTION_CLOSE_TAG+ Tags.USER_OPEN_TAG + name + Tags.USER_CLOSE_TAG
+				+ Tags.USER_OPEN_TAG + nameDes + Tags.USER_CLOSE_TAG+Tags.CHAT_MSG_OPEN_TAG +icon +Tags.CHAT_MSG_CLOSE_TAG;
+	}
+	public static String FileSendRequest(String name,String nameDes,String filename)
+	{
+		return Tags.OPTION_OPEN_TAG + "5" +Tags.OPTION_CLOSE_TAG+ Tags.USER_OPEN_TAG + name + Tags.USER_CLOSE_TAG
+				+ Tags.USER_OPEN_TAG + nameDes + Tags.USER_CLOSE_TAG+Tags.CHAT_MSG_OPEN_TAG +filename +Tags.CHAT_MSG_CLOSE_TAG;
+	}
 	public static String Quit(String name)
 	{
 		return Tags.OPTION_OPEN_TAG + "4" +Tags.OPTION_CLOSE_TAG + Tags.USER_OPEN_TAG + name + Tags.USER_CLOSE_TAG;
 	}
 	
-	public static String requestConnect(String name, String nameDes)
-	{
-		return  Tags.OPTION_OPEN_TAG + "5" +Tags.OPTION_CLOSE_TAG+ Tags.USER_OPEN_TAG + name + Tags.USER_CLOSE_TAG
-				+ Tags.USER_OPEN_TAG + nameDes + Tags.USER_CLOSE_TAG;
+	public static String CreateAccount(String name,String password) {// 3 
+		return Tags.OPTION_OPEN_TAG + "3" +Tags.OPTION_CLOSE_TAG + Tags.USER_OPEN_TAG + name + Tags.USER_CLOSE_TAG + Tags.PEER_PASSWORD_OPEN_TAG 
+				+password +Tags.PEER_PASSWORD_CLOSE_TAG;
 	}
-	
+
 	public static String SendMessage(String name,String nameDes, String msg)
 	{
 		return Tags.OPTION_OPEN_TAG + "2" +Tags.OPTION_CLOSE_TAG+ Tags.USER_OPEN_TAG + name + Tags.USER_CLOSE_TAG
-				+ Tags.USER_OPEN_TAG + nameDes + Tags.USER_CLOSE_TAG+Tags.CHAT_MSG_OPEN_TAG +msg +Tags.CHAT_CLOSE_TAG;
+				+ Tags.USER_OPEN_TAG + nameDes + Tags.USER_CLOSE_TAG+Tags.CHAT_MSG_OPEN_TAG +msg +Tags.CHAT_MSG_CLOSE_TAG;
 	}
-	public static String CreateAccount(String name,String password) {// 3 
-		return Tags.OPTION_OPEN_TAG + "3" +Tags.OPTION_CLOSE_TAG + Tags.PEER_NAME_OPEN_TAG + name + Tags.PEER_NAME_CLOSE_TAG + Tags.PEER_PASSWORD_OPEN_TAG 
-				+password +Tags.PEER_PASSWORD_CLOSE_TAG;
-	}
+
 	
 	public static String sendRequest(String name,String password) {
-		return Tags.OPTION_OPEN_TAG + "1" +Tags.OPTION_CLOSE_TAG + Tags.PEER_NAME_OPEN_TAG + name + Tags.PEER_NAME_CLOSE_TAG + Tags.PEER_PASSWORD_OPEN_TAG 
+		return Tags.OPTION_OPEN_TAG + "1" +Tags.OPTION_CLOSE_TAG + Tags.USER_OPEN_TAG + name + Tags.USER_CLOSE_TAG + Tags.PEER_PASSWORD_OPEN_TAG 
 				+password +Tags.PEER_PASSWORD_CLOSE_TAG;
 	}
 

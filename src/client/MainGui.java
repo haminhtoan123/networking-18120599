@@ -25,14 +25,14 @@ import java.util.HashMap;
 import java.util.List;
 
 public class MainGui {
-	private int temp=0;
-	private Client client;
+
+	private static Client client;
 	private static String  nameUser = "", dataUser = "";
-	private HashMap<String,ChatGui> chatRoom = new HashMap<String, ChatGui>();
+	private static HashMap<String,ChatGui> chatRoom = new HashMap<String, ChatGui>();// key = DesUsername
 	//private ChatGui test ;// Map Of  Gui
 	private JFrame frameMainGui;
 	private JTextField txtNameFriend;
-	private JButton btnChat, btnExit;
+	private JButton btnExit;
 	private JLabel lblLogo;
 	private JLabel lblActiveNow;
 	private static JList<String> listActive;
@@ -46,7 +46,7 @@ public class MainGui {
 			public void run() {
 				try {
 					MainGui window = new MainGui(null,"hihi",null);
-					window.frameMainGui.setVisible(true);
+				//	window.frameMainGui.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -72,11 +72,53 @@ public class MainGui {
 			}
 		});
 	}
-
 	public MainGui(String name,Socket con) throws Exception {
 		initialize();
 		client =new Client(name,con);
 		//clientNode = new Client(IPClient, portClient, nameUser, dataUser);
+	}
+	
+	public static void updateSendFile(String nameDes,String filename)
+	{
+		if(!chatRoom.containsKey(nameDes))
+		{
+			ChatGui temp = new ChatGui(nameDes,client);
+			temp.updateReceiveFile(filename);
+			chatRoom.put(nameDes, temp);
+			
+		}
+		else
+		{
+			chatRoom.get(nameDes).updateReceiveFile(filename);
+		}
+	}
+	public static void updateIcon(String nameDes,int Icon)
+	{
+		if(!chatRoom.containsKey(nameDes))
+		{
+			ChatGui temp = new ChatGui(nameDes,client);
+			temp.updateReceiveIcon(Icon);
+			chatRoom.put(nameDes, temp);
+			
+		}
+		else
+		{
+			chatRoom.get(nameDes).updateReceiveIcon(Icon);
+		}
+	}
+	public static void updateMessage(String nameDes,String msg)
+	{
+		if(!chatRoom.containsKey(nameDes))
+		{
+			ChatGui temp = new ChatGui(nameDes,client);
+			temp.SetData(msg);
+			chatRoom.put(nameDes, temp);
+			
+		}
+		else
+		{
+			chatRoom.get(nameDes).SetData(msg);
+		}
 	}
 	
 	public static void getUser(String msg)
@@ -99,6 +141,24 @@ public class MainGui {
 	
 	private void initialize() {
 		frameMainGui = new JFrame();
+		frameMainGui.addWindowListener(new java.awt.event.WindowAdapter() {
+		    @Override
+		    public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+		       // frame.setVisible(false);
+		    	int result = Tags.show(frameMainGui, "Are you sure ?", true);
+				if (result == 0) {
+					try {
+						System.out.println("GUI QUIT");
+						
+						client.exit();
+						frameMainGui.dispose();
+					} catch (Exception e) {
+						e.printStackTrace();
+						frameMainGui.dispose();
+					}
+				}
+		    }
+		});
 		frameMainGui.setTitle("Menu Chat");
 		frameMainGui.setResizable(false);
 		frameMainGui.setBounds(100, 100, 500, 560);
@@ -106,8 +166,8 @@ public class MainGui {
 		frameMainGui.getContentPane().setLayout(null);
 
 		JLabel lblHello = new JLabel("Welcome");
-		lblHello.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-		lblHello.setBounds(12, 82, 70, 16);
+		lblHello.setFont(new Font("Segoe UI", Font.PLAIN, 20));
+		lblHello.setBounds(12, 60, 90, 30);
 		frameMainGui.getContentPane().add(lblHello);
 
 
@@ -122,45 +182,9 @@ public class MainGui {
 		txtNameFriend.setBounds(100, 419, 384, 28);
 		frameMainGui.getContentPane().add(txtNameFriend);
 
-		btnChat = new JButton("Chat");
-		btnChat.setFont(new Font("Segoe UI", Font.PLAIN, 13));
 		
-		btnChat.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent arg0) {
-				
-				if(temp == 1)
-				{
-					System.out.println("adduuuuuu");
-					test.SetData("ADUUUU");
-					return;
-				}
-				test = new ChatGui("Ha Minh Toan","");
-				temp = 1;
-//				String nameDes = txtNameFriend.getText();
-//				if (nameDes.equals("")){
-//					Tags.show(frameMainGui, "Invaild username", false);
-//					return;
-//				}
-//				if (nameDes.equals(nameUser)) { 
-//					Tags.show(frameMainGui, "This software doesn't support chat yourself function", false);
-//					return;
-//				}
-//				
-//				
-//				try {
-//					client.Request(nameDes);
-//				} catch (IOException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//
-//				Tags.show(frameMainGui, "Friend is not found. Please wait to update your list friend", false);
-			}
-		});
-		btnChat.setBounds(20, 465, 129, 44);
-		frameMainGui.getContentPane().add(btnChat);
-		btnChat.setIcon(new javax.swing.ImageIcon(MainGui.class.getResource("/image/chat.png")));
+		
+		
 		btnExit = new JButton("Exit");
 		btnExit.setFont(new Font("Segoe UI", Font.PLAIN, 13));
 		btnExit.addActionListener(new ActionListener() {
@@ -185,15 +209,15 @@ public class MainGui {
 		
 		lblLogo = new JLabel("CHAT APP");
 		lblLogo.setForeground(new Color(0, 0, 205));
-		lblLogo.setIcon(new javax.swing.ImageIcon(MainGui.class.getResource("/image/connect.png")));
+	
 		lblLogo.setFont(new Font("Tahoma", Font.PLAIN, 18));
 		lblLogo.setBounds(51, 13, 413, 38);
 		frameMainGui.getContentPane().add(lblLogo);
 		
-		lblActiveNow = new JLabel("List Account Active Now");
+		lblActiveNow = new JLabel("ONLINE USERS");
 		lblActiveNow.setForeground(new Color(100, 149, 237));
 		lblActiveNow.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-		lblActiveNow.setBounds(10, 123, 156, 16);
+		lblActiveNow.setBounds(10, 110, 156, 30);
 		frameMainGui.getContentPane().add(lblActiveNow);
 		
 		listActive = new JList<>(model);
@@ -203,7 +227,28 @@ public class MainGui {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				String value = (String)listActive.getModel().getElementAt(listActive.locationToIndex(arg0.getPoint()));
-				txtNameFriend.setText(value);
+				String nameDes = value;
+				if (nameDes.equals("")){
+					Tags.show(frameMainGui, "Invaild username", false);
+					return;
+				}
+				if (nameDes.equals(nameUser)) { 
+					Tags.show(frameMainGui, "This software doesn't support chat yourself function", false);
+					return;
+				}
+				if(chatRoom.containsKey(nameDes))
+				{
+					if(chatRoom.get(nameDes).getFrame().isVisible())
+					Tags.show(frameMainGui, "U are already chat with this guy", false);
+					else
+					{
+						chatRoom.get(nameDes).getFrame().setVisible(true);
+					}
+					return;
+				}
+				
+				chatRoom.put(nameDes, new ChatGui(nameDes,client));
+				return;
 			}
 		});
 		listActive.setBounds(12, 152, 472, 251);

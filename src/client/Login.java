@@ -1,4 +1,4 @@
-package login;
+package client;
 
 import java.awt.EventQueue;
 import java.util.Random;
@@ -9,7 +9,7 @@ import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.JButton;
-import client.MainGui;
+
 import tags.Encode;
 import tags.Tags;
 
@@ -33,9 +33,7 @@ import java.awt.Font;
 import javax.swing.UIManager;
 
 public class Login {
- private static String NAME_FAILED = "THIS NAME CONTAINS INVALID CHARACTER. PLEASE TRY AGAIN";
- private static String NAME_EXSIST = "THIS NAME IS ALREADY USED. PLEASE TRY AGAIN";
- private static String SERVER_NOT_START = "TURN ON SERVER BEFORE START";
+
 
  private Socket con;
 
@@ -111,7 +109,7 @@ public class Login {
   lblPassword.setBounds(10, 170, 106, 38);
   frameLoginForm.getContentPane().add(lblPassword);
     
-  lblError = new JLabel("abcbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
+  lblError = new JLabel();
   lblError.setBounds(66, 287, 399, 20);
   frameLoginForm.getContentPane().add(lblError);
   
@@ -234,7 +232,7 @@ public class Login {
 			}
 			else { 
 				// new frame
-				
+			
 				try {
 					
 					MainGui chat = new MainGui(con,name,msg1);
@@ -250,50 +248,13 @@ public class Login {
 			e.printStackTrace();
 		}
 		
-//
-//
-//    //must edit here
-//    if (checkName.matcher(name).matches() && !IP.equals("")) {
-//     try {
-//      Random rd = new Random();
-//      int portPeer = 10000 + rd.nextInt() % 1000;
-//      InetAddress ipServer = InetAddress.getByName(IP);
-//      int portServer = Integer.parseInt("8080");
-//      Socket socketClient = new Socket(ipServer, portServer);
-//
-//      String msg = Encode.CreateAccount(name, Integer.toString(portPeer));
-//      ObjectOutputStream serverOutputStream = new ObjectOutputStream(socketClient.getOutputStream());
-//      serverOutputStream.writeObject(msg);
-//      serverOutputStream.flush();
-//      ObjectInputStream serverInputStream = new ObjectInputStream(socketClient.getInputStream());
-//      msg = (String) serverInputStream.readObject();
-//
-//      socketClient.close();
-//      if (msg.equals(Tags.SESSION_DENY_TAG)) {
-//       lblError.setText(NAME_EXSIST);
-//       lblError.setVisible(true);
-//       return;
-//      }
-//      new MainGui(IP, portPeer, name, msg);
-//      //						new menuGUI(IP, portPeer, "toan", msg);
-//      frameLoginForm.dispose();
-//     } catch (Exception e) {
-//      lblError.setText(SERVER_NOT_START);
-//      lblError.setVisible(true);
-//      e.printStackTrace();
-//     }
-//    }
-//    else {
-//     lblError.setText(NAME_FAILED);
-//     lblError.setVisible(true);
-//     lblError.setText(NAME_FAILED);
-//    }
+
    }
   });
   
   btnLogin.setBounds(325, 217, 169, 63);
   frameLoginForm.getContentPane().add(btnLogin);
-//  lblError.setVisible(false);
+
 
 
  }
