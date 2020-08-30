@@ -33,9 +33,7 @@ public class ServerCore {
 	private UserList users = new UserList();
 	private HashMap<String, Client> clients = new HashMap<String,Client>();
 	private ServerSocket server;						
-	private Socket connection;			
-	private ObjectOutputStream obOutputClient;		
-	private ObjectInputStream obInputStream;			
+	private Socket connection;					
 	public boolean isStop = false, isExit = false;		
 	
 	public static void main(String[] args) throws Exception, IOException {
@@ -45,7 +43,12 @@ public class ServerCore {
 
 	
 	
+	public ServerCore(int port) throws Exception {
+		server = new ServerSocket(port);		
+	//	dataPeer = new ArrayList<Peer>();
+		(new ClientHandle()).start();
 	
+	}
 	public void ClientPrint()
 	{
 		
@@ -101,12 +104,7 @@ public class ServerCore {
 	    System.out.println("Send To One Client");
 	}
 	//Intial server socket
-	public ServerCore(int port) throws Exception {
-		server = new ServerSocket(port);		
-	//	dataPeer = new ArrayList<Peer>();
-		(new ClientHandle()).start();
-	
-	}
+
 	//	close server
 	public void stopserver() throws Exception {
 		isStop = true;

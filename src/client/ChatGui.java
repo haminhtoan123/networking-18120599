@@ -337,7 +337,7 @@ public class ChatGui  {
 		btnGetFile.setBounds(381, 333, 79, 45);
 		contentPane.add(btnGetFile);
 		
-		filePath= new JLabel("New label");// file
+		filePath= new JLabel();// file
 		
 		filePath.setBounds(43, 349, 241, 16);
 		contentPane.add(filePath);

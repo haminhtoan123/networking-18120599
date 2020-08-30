@@ -31,7 +31,6 @@ public class MainGui {
 	private static HashMap<String,ChatGui> chatRoom = new HashMap<String, ChatGui>();// key = DesUsername
 	//private ChatGui test ;// Map Of  Gui
 	private JFrame frameMainGui;
-	private JTextField txtNameFriend;
 	private JButton btnExit;
 	private JLabel lblLogo;
 	private JLabel lblActiveNow;
@@ -74,9 +73,9 @@ public class MainGui {
 	}
 	public MainGui(String name,Socket con) throws Exception {
 		initialize();
-		client =new Client(name,con);
-		//clientNode = new Client(IPClient, portClient, nameUser, dataUser);
+		client =new Client(name,con);	
 	}
+	
 	
 	public static void updateSendFile(String nameDes,String filename)
 	{
@@ -171,16 +170,6 @@ public class MainGui {
 		frameMainGui.getContentPane().add(lblHello);
 
 
-		JLabel lblFriendsName = new JLabel("Name Friend: ");
-		lblFriendsName.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-		lblFriendsName.setBounds(12, 425, 110, 16);
-		frameMainGui.getContentPane().add(lblFriendsName);
-		
-		txtNameFriend = new JTextField("");
-		txtNameFriend.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-		txtNameFriend.setColumns(10);
-		txtNameFriend.setBounds(100, 419, 384, 28);
-		frameMainGui.getContentPane().add(txtNameFriend);
 
 		
 		

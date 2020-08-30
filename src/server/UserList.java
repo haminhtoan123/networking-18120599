@@ -73,7 +73,7 @@ public class UserList {
 		BufferedReader br ;
 		try 
 		{
-			 br = new BufferedReader(new FileReader("src/User.txt"));
+			 br = new BufferedReader(new FileReader("User.txt"));
 		} 
 		catch(FileNotFoundException exc) 
 		{
@@ -103,7 +103,7 @@ public class UserList {
 
 		FileOutputStream fout;
 		
-		fout = new FileOutputStream("src/User.txt");
+		fout = new FileOutputStream("User.txt");
 	
 		try 
 		{
